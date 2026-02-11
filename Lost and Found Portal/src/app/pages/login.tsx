@@ -5,8 +5,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { HeartHandshake, Search, Sparkles, AlertCircle } from "lucide-react";
-import loginBg from "figma:asset/bdf5284f19d931be0183f26aec6516beaa057b18.png";
-
+import ginBg from "./starBG.jpg";
 export function LoginPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
