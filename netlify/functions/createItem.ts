@@ -4,28 +4,17 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
 });
 
-export const handler = async (event: any) => {
-  if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: 'Method not allowed' };
-  }
-
+export const handler = async () => {
   try {
-    const { type, category, title, description, location, date, contactName, contactNumber } = JSON.parse(event.body);
-    
-    const query = `
-      INSERT INTO items (type, category, title, description, location, date, contact_name, contact_number)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-      RETURNING *;
-    `;
-
-    const result = await pool.query(query, [type, category, title, description, location, date, contactName, contactNumber]);
-    
+    const result = await pool.query('SELECT NOW()');
     return {
       statusCode: 200,
-      body: JSON.stringify(result.rows[0]),
+      body: JSON.stringify(result.rows),
     };
-  } catch (error: any) {
-    console.error(error);
-    return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
+  } catch (error) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Database error' }),
+    };
   }
 };
