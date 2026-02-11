@@ -149,36 +149,61 @@ export function DashboardPage() {
     setNewItem({ ...newItem, imageUrl: "" });
   };
 
-  const handlePostItem = () => {
+  const handlePostItem = async () => {
     if (!newItem.category || !newItem.title || !newItem.description || !newItem.location) {
+      alert("Please fill in all required fields");
       return;
     }
 
-    const item: LostFoundItem = {
-      id: Date.now().toString(),
-      type: newItem.type as "lost" | "found",
-      category: newItem.category,
-      title: newItem.title,
-      description: newItem.description,
-      location: newItem.location,
-      date: newItem.date || new Date().toISOString().split("T")[0],
-      contactName: user?.name || "Anonymous",
-      contactNumber: user?.contactNumber || "",
-      imageUrl: newItem.imageUrl,
-    };
+    try {
+      const response = await fetch("/.netlify/functions/createItem", {
+        method: "POST",
+        body: JSON.stringify({
+          type: newItem.type,
+          category: newItem.category,
+          title: newItem.title,
+          description: newItem.description,
+          location: newItem.location,
+          date: newItem.date || new Date().toISOString().split("T")[0],
+          contactName: user?.name || "Anonymous",
+          contactNumber: user?.contactNumber || "",
+        }),
+      });
 
-    setItems([item, ...items]);
-    setIsDialogOpen(false);
-    setNewItem({
-      type: "lost",
-      category: "",
-      title: "",
-      description: "",
-      location: "",
-      date: new Date().toISOString().split("T")[0],
-      imageUrl: "",
-    });
-    setImagePreview("");
+      if (!response.ok) {
+        throw new Error("Failed to post item");
+      }
+
+      const savedItem = await response.json();
+      const item: LostFoundItem = {
+        id: savedItem.id || Date.now().toString(),
+        type: newItem.type as "lost" | "found",
+        category: newItem.category,
+        title: newItem.title,
+        description: newItem.description,
+        location: newItem.location,
+        date: newItem.date || new Date().toISOString().split("T")[0],
+        contactName: user?.name || "Anonymous",
+        contactNumber: user?.contactNumber || "",
+      };
+
+      setItems([item, ...items]);
+      setIsDialogOpen(false);
+      setNewItem({
+        type: "lost",
+        category: "",
+        title: "",
+        description: "",
+        location: "",
+        date: new Date().toISOString().split("T")[0],
+        imageUrl: "",
+      });
+      setImagePreview("");
+      alert("Item posted successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Error posting item. Please try again.");
+    }
   };
 
   const filteredItems = items.filter((item) => {
